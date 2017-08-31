@@ -137,13 +137,10 @@ public class TelegramConnectService implements CommandLineRunner {
         userChannel.setLastIrcLogID(ircLog.getId() + "");
         userChannel.setLastMessageTime(new Date());
         userChannelService.save(userChannel);
-        if (message.matches("^\\d+: .*")) {
-            String[] split = message.split(":");
-            int chanId = Integer.valueOf(split[0]);
-            ircEvent.setMessage(split[1].trim());
-            engineCommunicator.sendToIrcChannel(ircEvent, chanId);
-        } else {
+        if (message.startsWith("!")) {
             engineCommunicator.sendToEngine(ircEvent, null);
+        } else {
+            engineCommunicator.sendToIrcChannel(ircEvent, 2); // IRCNET lowlife
         }
     }
 
