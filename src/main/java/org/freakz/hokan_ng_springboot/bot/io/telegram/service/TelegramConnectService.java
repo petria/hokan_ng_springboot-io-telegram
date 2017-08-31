@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.freakz.hokan_ng_springboot.bot.common.events.EngineResponse;
 import org.freakz.hokan_ng_springboot.bot.common.events.IrcEvent;
 import org.freakz.hokan_ng_springboot.bot.common.events.IrcMessageEvent;
+import org.freakz.hokan_ng_springboot.bot.common.jms.api.JmsSender;
 import org.freakz.hokan_ng_springboot.bot.common.jpa.entity.Channel;
 import org.freakz.hokan_ng_springboot.bot.common.jpa.entity.ChannelStartupState;
 import org.freakz.hokan_ng_springboot.bot.common.jpa.entity.ChannelState;
@@ -59,6 +60,9 @@ public class TelegramConnectService implements CommandLineRunner {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private JmsSender jmsSender;
+
 
     private Network getNetwork() {
         Network network = networkService.getNetwork(NETWORK_NAME);
@@ -112,7 +116,6 @@ public class TelegramConnectService implements CommandLineRunner {
 
     public void sendMessageToEngine(String message, String sender, Long chatId) {
 
-
         IrcLog ircLog = this.ircLogService.addIrcLog(new Date(), sender, CHANNEL_NAME, message);
 
         Network nw = getNetwork();
@@ -134,19 +137,24 @@ public class TelegramConnectService implements CommandLineRunner {
         userChannel.setLastIrcLogID(ircLog.getId() + "");
         userChannel.setLastMessageTime(new Date());
         userChannelService.save(userChannel);
-
-        engineCommunicator.sendToEngine(ircEvent, null);
+        if (message.matches("^\\d+: .*")) {
+            String[] split = message.split(":");
+            int chanId = Integer.valueOf(split[0]);
+            ircEvent.setMessage(split[1].trim());
+            engineCommunicator.sendToIrcChannel(ircEvent, chanId);
+        } else {
+            engineCommunicator.sendToEngine(ircEvent, null);
+        }
     }
 
-
-    private MyAmazingBot myAmazingBot;
+    private TelegramBot telegramBot;
 
     private void connectTelegram() {
         ApiContextInitializer.init();
         TelegramBotsApi botsApi = new TelegramBotsApi();
         try {
-            myAmazingBot = new MyAmazingBot(this);
-            botsApi.registerBot(myAmazingBot);
+            telegramBot = new TelegramBot(this);
+            botsApi.registerBot(telegramBot);
         } catch (TelegramApiException e) {
             e.printStackTrace();
         }
@@ -166,7 +174,21 @@ public class TelegramConnectService implements CommandLineRunner {
                 .setChatId(chatId)
                 .setText(response.getResponseMessage());
         try {
-            myAmazingBot.sendMessage(message);
+            telegramBot.sendMessage(message);
+        } catch (TelegramApiException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void handleIrcMessage(IrcMessageEvent event) {
+        long chatId = Long.valueOf(event.getParameter());
+        log.debug("IRC event: {}", chatId);
+        String fromIrc = String.format("%s@%s %s", event.getSender(), event.getChannel(), event.getMessage());
+        SendMessage message = new SendMessage() // Create a SendMessage object with mandatory fields
+                .setChatId(chatId)
+                .setText(fromIrc);
+        try {
+            telegramBot.sendMessage(message);
         } catch (TelegramApiException e) {
             e.printStackTrace();
         }

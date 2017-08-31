@@ -3,6 +3,7 @@ package org.freakz.hokan_ng_springboot.bot.io.telegram.jms;
 import lombok.extern.slf4j.Slf4j;
 import org.freakz.hokan_ng_springboot.bot.common.enums.HokanModule;
 import org.freakz.hokan_ng_springboot.bot.common.events.IrcMessageEvent;
+import org.freakz.hokan_ng_springboot.bot.common.events.NotifyRequest;
 import org.freakz.hokan_ng_springboot.bot.common.events.ServiceRequest;
 import org.freakz.hokan_ng_springboot.bot.common.events.ServiceRequestType;
 import org.freakz.hokan_ng_springboot.bot.common.jms.api.JmsSender;
@@ -49,32 +50,6 @@ public class CommunicatorImpl implements EngineCommunicator, ServiceCommunicator
         return wasAlias;
     }
 
-    private boolean isLastCommandRepeatAlias(IrcMessageEvent event, UserChannel userChannel) {
-        CommandArgs args = new CommandArgs(event.getMessage());
-        if (args.getCmd().equals("!")) {
-            String lastCommand = userChannel.getLastCommand();
-            if (lastCommand != null && lastCommand.length() > 0) {
-                CommandArgs lastCommandArgs = new CommandArgs(lastCommand);
-                String aliasMessage;
-                if (args.hasArgs()) {
-                    String message = event.getMessage();
-                    aliasMessage = message.replaceFirst("!", lastCommandArgs.getCmd());
-                    event.setMessage(aliasMessage);
-                } else {
-                    String message = event.getMessage();
-                    aliasMessage = message.replaceFirst("!", lastCommand);
-                    event.setMessage(aliasMessage);
-                }
-//        event.setOutputPrefix(String.format("%s :: ", aliasMessage));
-                return true;
-            } else {
-                log.debug("No valid lastCommand: {}", lastCommand);
-                return false;
-            }
-        }
-        return false;
-    }
-
     @Override
     public String sendToEngine(IrcMessageEvent event, UserChannel userChannel) {
         if (event.getMessage().length() > 0) {
@@ -112,6 +87,14 @@ public class CommunicatorImpl implements EngineCommunicator, ServiceCommunicator
             return "Sent!";
         }
         return "not a command";
+    }
+
+    @Override
+    public void sendToIrcChannel(IrcMessageEvent event, int chanId) {
+        NotifyRequest notifyRequest = new NotifyRequest();
+        notifyRequest.setNotifyMessage(String.format("%s@telegram: %s", event.getSender(), event.getMessage()));
+        notifyRequest.setTargetChannelId(chanId);
+        jmsSender.send(HokanModule.HokanIoTelegram, HokanModule.HokanIo.getQueueName(), "TELEGRAM_NOTIFY_REQUEST", notifyRequest, false);
     }
 
 
