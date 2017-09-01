@@ -15,7 +15,12 @@ public class TelegramBot extends TelegramLongPollingBot {
     @Override
     public void onUpdateReceived(Update update) {
         if (update.hasMessage() && update.getMessage().hasText()) {
-            String from = update.getMessage().getFrom().getFirstName() + update.getMessage().getFrom().getLastName();
+            String from;
+            if (update.getMessage().getFrom().getUserName() != null && update.getMessage().getFrom().getUserName().length() > 0) {
+                from = update.getMessage().getFrom().getUserName();
+            } else {
+                from = update.getMessage().getFrom().getFirstName() + update.getMessage().getFrom().getLastName();
+            }
             connectService.sendMessageToEngine(update.getMessage().getText(), from, update.getMessage().getChatId());
         }
     }

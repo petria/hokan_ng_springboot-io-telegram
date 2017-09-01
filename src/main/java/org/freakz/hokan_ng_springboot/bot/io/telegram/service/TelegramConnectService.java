@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.freakz.hokan_ng_springboot.bot.common.events.EngineResponse;
 import org.freakz.hokan_ng_springboot.bot.common.events.IrcEvent;
 import org.freakz.hokan_ng_springboot.bot.common.events.IrcMessageEvent;
+import org.freakz.hokan_ng_springboot.bot.common.events.MessageToTelegram;
 import org.freakz.hokan_ng_springboot.bot.common.jms.api.JmsSender;
 import org.freakz.hokan_ng_springboot.bot.common.jpa.entity.Channel;
 import org.freakz.hokan_ng_springboot.bot.common.jpa.entity.ChannelStartupState;
@@ -189,5 +190,19 @@ public class TelegramConnectService implements CommandLineRunner {
         } catch (TelegramApiException e) {
             e.printStackTrace();
         }
+    }
+
+    public void handleMessageToTelegram(MessageToTelegram message) {
+        long chatId = Long.valueOf(message.getTelegramChatId());
+        log.debug("MessageToTelegram: {}", chatId);
+        SendMessage sendMessage = new SendMessage() // Create a SendMessage object with mandatory fields
+                .setChatId(chatId)
+                .setText(message.getMessage());
+        try {
+            telegramBot.sendMessage(sendMessage);
+        } catch (TelegramApiException e) {
+            e.printStackTrace();
+        }
+
     }
 }

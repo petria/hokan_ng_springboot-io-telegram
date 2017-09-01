@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.freakz.hokan_ng_springboot.bot.common.enums.HokanModule;
 import org.freakz.hokan_ng_springboot.bot.common.events.EngineResponse;
 import org.freakz.hokan_ng_springboot.bot.common.events.IrcMessageEvent;
+import org.freakz.hokan_ng_springboot.bot.common.events.MessageToTelegram;
 import org.freakz.hokan_ng_springboot.bot.common.jms.JmsEnvelope;
 import org.freakz.hokan_ng_springboot.bot.common.jms.SpringJmsReceiver;
 import org.freakz.hokan_ng_springboot.bot.io.telegram.service.TelegramConnectService;
@@ -34,6 +35,9 @@ public class IoTelegramJmsReceiver extends SpringJmsReceiver {
         } else if (envelope.getMessageIn().getPayLoadObject("IRC_MESSAGE") != null) {
             IrcMessageEvent event = (IrcMessageEvent) envelope.getMessageIn().getPayLoadObject("IRC_MESSAGE");
             telegramConnectService.handleIrcMessage(event);
+        } else if (envelope.getMessageIn().getPayLoadObject("MESSAGE_TO_TELEGRAM") != null) {
+            MessageToTelegram message = (MessageToTelegram) envelope.getMessageIn().getPayLoadObject("MESSAGE_TO_TELEGRAM");
+            telegramConnectService.handleMessageToTelegram(message);
         }
     }
 
