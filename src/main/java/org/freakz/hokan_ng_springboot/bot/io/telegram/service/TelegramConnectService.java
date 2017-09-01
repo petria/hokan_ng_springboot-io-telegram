@@ -141,7 +141,9 @@ public class TelegramConnectService implements CommandLineRunner {
         if (message.startsWith("!")) {
             engineCommunicator.sendToEngine(ircEvent, null);
         } else {
-            engineCommunicator.sendToIrcChannel(ircEvent, 2); // IRCNET lowlife
+            if (!message.startsWith("=")) {
+                engineCommunicator.sendToIrcChannel(ircEvent, 2); // IRCNET lowlife
+            }
         }
     }
 
@@ -199,6 +201,7 @@ public class TelegramConnectService implements CommandLineRunner {
                 .setChatId(chatId)
                 .setText(message.getMessage());
         try {
+//            telegramBot.
             telegramBot.sendMessage(sendMessage);
         } catch (TelegramApiException e) {
             e.printStackTrace();
