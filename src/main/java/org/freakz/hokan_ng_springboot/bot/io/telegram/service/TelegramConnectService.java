@@ -12,8 +12,10 @@ import org.freakz.hokan_ng_springboot.bot.common.jpa.entity.ChannelState;
 import org.freakz.hokan_ng_springboot.bot.common.jpa.entity.ChannelStats;
 import org.freakz.hokan_ng_springboot.bot.common.jpa.entity.IrcLog;
 import org.freakz.hokan_ng_springboot.bot.common.jpa.entity.Network;
+import org.freakz.hokan_ng_springboot.bot.common.jpa.entity.PropertyName;
 import org.freakz.hokan_ng_springboot.bot.common.jpa.entity.User;
 import org.freakz.hokan_ng_springboot.bot.common.jpa.entity.UserChannel;
+import org.freakz.hokan_ng_springboot.bot.common.jpa.service.ChannelPropertyService;
 import org.freakz.hokan_ng_springboot.bot.common.jpa.service.ChannelService;
 import org.freakz.hokan_ng_springboot.bot.common.jpa.service.ChannelStatsService;
 import org.freakz.hokan_ng_springboot.bot.common.jpa.service.IrcLogService;
@@ -31,6 +33,7 @@ import org.telegram.telegrambots.api.methods.send.SendMessage;
 import org.telegram.telegrambots.exceptions.TelegramApiException;
 
 import java.util.Date;
+import java.util.List;
 
 @Service
 @Slf4j
@@ -42,6 +45,9 @@ public class TelegramConnectService implements CommandLineRunner {
 
     @Autowired
     private EngineCommunicator engineCommunicator;
+
+    @Autowired
+    private ChannelPropertyService channelPropertyService;
 
     @Autowired
     private ChannelService channelService;
@@ -138,11 +144,18 @@ public class TelegramConnectService implements CommandLineRunner {
         userChannel.setLastIrcLogID(ircLog.getId() + "");
         userChannel.setLastMessageTime(new Date());
         userChannelService.save(userChannel);
+
+
         if (message.startsWith("!")) {
             engineCommunicator.sendToEngine(ircEvent, null);
         } else {
             if (!message.startsWith("=")) {
-                engineCommunicator.sendToIrcChannel(ircEvent, 2); // IRCNET lowlife
+                List<Channel> channelsWithProperty = channelPropertyService.getChannelsWithProperty(PropertyName.PROP_CHANNEL_TELEGRAM_LINK, chatId + "");
+                for (Channel channel : channelsWithProperty) {
+                    long id = channel.getId();
+                    log.debug("Sending to IRC channel, id: {}", id);
+                    engineCommunicator.sendToIrcChannel(ircEvent, (int) id);
+                }
             }
         }
     }
