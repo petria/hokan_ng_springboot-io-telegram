@@ -1,6 +1,5 @@
 package org.freakz.hokan_ng_springboot.bot.io.telegram.jms;
 
-import lombok.extern.slf4j.Slf4j;
 import org.freakz.hokan_ng_springboot.bot.common.enums.HokanModule;
 import org.freakz.hokan_ng_springboot.bot.common.events.EngineResponse;
 import org.freakz.hokan_ng_springboot.bot.common.events.IrcMessageEvent;
@@ -16,7 +15,6 @@ import org.springframework.stereotype.Component;
  * -
  */
 @Component
-@Slf4j
 public class IoTelegramJmsReceiver extends SpringJmsReceiver {
 
 

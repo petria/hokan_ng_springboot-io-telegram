@@ -1,6 +1,5 @@
 package org.freakz.hokan_ng_springboot.bot.io.telegram.service;
 
-import lombok.extern.slf4j.Slf4j;
 import org.freakz.hokan_ng_springboot.bot.common.events.EngineResponse;
 import org.freakz.hokan_ng_springboot.bot.common.events.IrcEvent;
 import org.freakz.hokan_ng_springboot.bot.common.events.IrcMessageEvent;
@@ -24,6 +23,8 @@ import org.freakz.hokan_ng_springboot.bot.common.jpa.service.UserChannelService;
 import org.freakz.hokan_ng_springboot.bot.common.jpa.service.UserService;
 import org.freakz.hokan_ng_springboot.bot.common.util.StringStuff;
 import org.freakz.hokan_ng_springboot.bot.io.telegram.jms.EngineCommunicator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Service;
@@ -36,8 +37,9 @@ import java.util.Date;
 import java.util.List;
 
 @Service
-@Slf4j
 public class TelegramConnectService implements CommandLineRunner {
+
+    private static final Logger log = LoggerFactory.getLogger(TelegramConnectService.class);
 
     private static final String NETWORK_NAME = "telegramNetwork";
 
@@ -69,7 +71,6 @@ public class TelegramConnectService implements CommandLineRunner {
 
     @Autowired
     private JmsSender jmsSender;
-
 
     private Network getNetwork() {
         Network network = networkService.getNetwork(NETWORK_NAME);
@@ -145,7 +146,6 @@ public class TelegramConnectService implements CommandLineRunner {
         userChannel.setLastMessageTime(new Date());
         userChannelService.save(userChannel);
 
-
         if (message.startsWith("!")) {
             engineCommunicator.sendToEngine(ircEvent, null);
         } else {
@@ -172,7 +172,6 @@ public class TelegramConnectService implements CommandLineRunner {
             e.printStackTrace();
         }
     }
-
 
     @Override
     public void run(String... strings) throws Exception {
@@ -214,7 +213,7 @@ public class TelegramConnectService implements CommandLineRunner {
                 .setChatId(chatId)
                 .setText(message.getMessage());
         try {
-//            telegramBot.
+            //            telegramBot.
             telegramBot.sendMessage(sendMessage);
         } catch (TelegramApiException e) {
             e.printStackTrace();
