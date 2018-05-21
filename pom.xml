@@ -47,7 +47,6 @@
         <start-class>org.freakz.hokan_ng_springboot.bot.io.telegram.HokanNgSpringBootIoTelegram</start-class>
         <jsoup.version>1.9.2</jsoup.version>
         <logback.version>1.1.9</logback.version>
-        <lombok.version>1.16.12</lombok.version>
         <smack.version>4.2.0</smack.version>
     </properties>
 
