@@ -5,22 +5,8 @@ import org.freakz.hokan_ng_springboot.bot.common.events.IrcEvent;
 import org.freakz.hokan_ng_springboot.bot.common.events.IrcMessageEvent;
 import org.freakz.hokan_ng_springboot.bot.common.events.MessageToTelegram;
 import org.freakz.hokan_ng_springboot.bot.common.jms.api.JmsSender;
-import org.freakz.hokan_ng_springboot.bot.common.jpa.entity.Channel;
-import org.freakz.hokan_ng_springboot.bot.common.jpa.entity.ChannelStartupState;
-import org.freakz.hokan_ng_springboot.bot.common.jpa.entity.ChannelState;
-import org.freakz.hokan_ng_springboot.bot.common.jpa.entity.ChannelStats;
-import org.freakz.hokan_ng_springboot.bot.common.jpa.entity.IrcLog;
-import org.freakz.hokan_ng_springboot.bot.common.jpa.entity.Network;
-import org.freakz.hokan_ng_springboot.bot.common.jpa.entity.PropertyName;
-import org.freakz.hokan_ng_springboot.bot.common.jpa.entity.User;
-import org.freakz.hokan_ng_springboot.bot.common.jpa.entity.UserChannel;
-import org.freakz.hokan_ng_springboot.bot.common.jpa.service.ChannelPropertyService;
-import org.freakz.hokan_ng_springboot.bot.common.jpa.service.ChannelService;
-import org.freakz.hokan_ng_springboot.bot.common.jpa.service.ChannelStatsService;
-import org.freakz.hokan_ng_springboot.bot.common.jpa.service.IrcLogService;
-import org.freakz.hokan_ng_springboot.bot.common.jpa.service.NetworkService;
-import org.freakz.hokan_ng_springboot.bot.common.jpa.service.UserChannelService;
-import org.freakz.hokan_ng_springboot.bot.common.jpa.service.UserService;
+import org.freakz.hokan_ng_springboot.bot.common.jpa.entity.*;
+import org.freakz.hokan_ng_springboot.bot.common.jpa.service.*;
 import org.freakz.hokan_ng_springboot.bot.common.util.StringStuff;
 import org.freakz.hokan_ng_springboot.bot.io.telegram.jms.EngineCommunicator;
 import org.slf4j.Logger;
@@ -56,9 +42,6 @@ public class TelegramConnectService implements CommandLineRunner {
 
     @Autowired
     private ChannelStatsService channelStatsService;
-
-    @Autowired
-    private IrcLogService ircLogService;
 
     @Autowired
     private NetworkService networkService;
@@ -124,7 +107,7 @@ public class TelegramConnectService implements CommandLineRunner {
 
     public void sendMessageToEngine(String message, String sender, Long chatId) {
 
-        IrcLog ircLog = this.ircLogService.addIrcLog(new Date(), sender, CHANNEL_NAME, message);
+//        IrcLog ircLog = this.ircLogService.addIrcLog(new Date(), sender, CHANNEL_NAME, message);
 
         Network nw = getNetwork();
         nw.addToLinesReceived(1);
@@ -142,7 +125,7 @@ public class TelegramConnectService implements CommandLineRunner {
         if (userChannel == null) {
             userChannel = new UserChannel(user, ch);
         }
-        userChannel.setLastIrcLogID(ircLog.getId() + "");
+//        userChannel.setLastIrcLogID(ircLog.getId() + "");
         userChannel.setLastMessageTime(new Date());
         userChannelService.save(userChannel);
 
