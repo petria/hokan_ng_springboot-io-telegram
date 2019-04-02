@@ -105,13 +105,23 @@ public class TelegramConnectService implements CommandLineRunner {
         return user;
     }
 
-    public void sendMessageToEngine(String message, String sender, Long chatId) {
+    private User getUserByTelegramId(int telegramId) {
+        User user = this.userService.getUserTelegramId(telegramId);
+        return user;
+    }
+
+    public void sendMessageToEngine(String message, String sender, Long chatId, Integer telegramUserId) {
 
 //        IrcLog ircLog = this.ircLogService.addIrcLog(new Date(), sender, CHANNEL_NAME, message);
 
         Network nw = getNetwork();
         nw.addToLinesReceived(1);
         this.networkService.save(nw);
+
+        User botUser = getUserByTelegramId(telegramUserId);
+        if (botUser != null) {
+            sender = botUser.getNick();
+        }
 
         IrcMessageEvent ircEvent = new IrcMessageEvent("" + chatId, NETWORK_NAME, CHANNEL_NAME, sender, "telegramLogin", "telegramHost", message);
 
