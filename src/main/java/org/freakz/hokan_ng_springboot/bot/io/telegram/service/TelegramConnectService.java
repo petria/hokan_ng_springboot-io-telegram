@@ -118,12 +118,15 @@ public class TelegramConnectService implements CommandLineRunner {
         nw.addToLinesReceived(1);
         this.networkService.save(nw);
 
+        IrcMessageEvent ircEvent;
+
         User botUser = getUserByTelegramId(telegramUserId);
         if (botUser != null) {
-            sender = botUser.getNick();
+            ircEvent = new IrcMessageEvent("" + chatId, NETWORK_NAME, CHANNEL_NAME, botUser.getNick(), "telegramLogin", "telegramHost", message);
+        } else {
+            ircEvent = new IrcMessageEvent("" + chatId, NETWORK_NAME, CHANNEL_NAME, sender, "telegramLogin", "telegramHost", message);
         }
 
-        IrcMessageEvent ircEvent = new IrcMessageEvent("" + chatId, NETWORK_NAME, CHANNEL_NAME, sender, "telegramLogin", "telegramHost", message);
 
         User user = getUser(ircEvent);
         Channel ch = getChannel(ircEvent);
@@ -135,14 +138,22 @@ public class TelegramConnectService implements CommandLineRunner {
         if (userChannel == null) {
             userChannel = new UserChannel(user, ch);
         }
-//        userChannel.setLastIrcLogID(ircLog.getId() + "");
         userChannel.setLastMessageTime(new Date());
         userChannelService.save(userChannel);
 
         if (message.startsWith("!")) {
             engineCommunicator.sendToEngine(ircEvent, null);
         } else {
-            if (!message.startsWith("=")) {
+            if (message.equals("=myid")) {
+                SendMessage idMessage = new SendMessage() // Create a SendMessage object with mandatory fields
+                        .setChatId(chatId)
+                        .setText(sender + ": Your Telegram User ID: " + telegramUserId + "\n");
+                try {
+                    telegramBot.sendMessage(idMessage);
+                } catch (TelegramApiException e) {
+                    e.printStackTrace();
+                }
+            } else  if (!message.startsWith("=")) {
                 List<Channel> channelsWithProperty = channelPropertyService.getChannelsWithProperty(PropertyName.PROP_CHANNEL_TELEGRAM_LINK, chatId + "");
                 for (Channel channel : channelsWithProperty) {
                     long id = channel.getId();
