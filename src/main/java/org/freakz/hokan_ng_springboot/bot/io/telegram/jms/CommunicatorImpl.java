@@ -94,7 +94,7 @@ public class CommunicatorImpl implements EngineCommunicator, ServiceCommunicator
     @Override
     public void sendToIrcChannel(IrcMessageEvent event, int chanId) {
         NotifyRequest notifyRequest = new NotifyRequest();
-        notifyRequest.setNotifyMessage(String.format("%s@telegram: %s", event.getSender(), event.getMessage()));
+        notifyRequest.setNotifyMessage(String.format("<%s@tg> %s", event.getSender(), event.getMessage()));
         notifyRequest.setTargetChannelId(chanId);
         jmsSender.send(HokanModule.HokanIoTelegram, HokanModule.HokanIo.getQueueName(), "TELEGRAM_NOTIFY_REQUEST", notifyRequest, false);
     }
