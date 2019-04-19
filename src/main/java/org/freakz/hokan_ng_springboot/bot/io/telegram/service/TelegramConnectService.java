@@ -7,6 +7,7 @@ import org.freakz.hokan_ng_springboot.bot.common.events.MessageToTelegram;
 import org.freakz.hokan_ng_springboot.bot.common.jms.api.JmsSender;
 import org.freakz.hokan_ng_springboot.bot.common.jpa.entity.*;
 import org.freakz.hokan_ng_springboot.bot.common.jpa.service.*;
+import org.freakz.hokan_ng_springboot.bot.common.util.CommandLineArgsParser;
 import org.freakz.hokan_ng_springboot.bot.common.util.StringStuff;
 import org.freakz.hokan_ng_springboot.bot.io.telegram.jms.EngineCommunicator;
 import org.slf4j.Logger;
@@ -144,6 +145,9 @@ public class TelegramConnectService implements CommandLineRunner {
         if (message.startsWith("!")) {
             engineCommunicator.sendToEngine(ircEvent, null);
         } else {
+            if (message.startsWith("=irclink")) {
+                CommandLineArgsParser commandLineArgsParser;
+            }
             if (message.equals("=myid")) {
                 SendMessage idMessage = new SendMessage() // Create a SendMessage object with mandatory fields
                         .setChatId(chatId)
