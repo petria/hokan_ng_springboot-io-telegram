@@ -125,6 +125,7 @@ public class TelegramConnectService implements CommandLineRunner {
         if (botUser != null) {
             ircEvent = new IrcMessageEvent("" + chatId, NETWORK_NAME, CHANNEL_NAME, botUser.getNick(), "telegramLogin", "telegramHost", message);
         } else {
+            log.debug("Not linked User with telegramUserId: {}", telegramUserId);
             ircEvent = new IrcMessageEvent("" + chatId, NETWORK_NAME, CHANNEL_NAME, sender, "telegramLogin", "telegramHost", message);
         }
 
