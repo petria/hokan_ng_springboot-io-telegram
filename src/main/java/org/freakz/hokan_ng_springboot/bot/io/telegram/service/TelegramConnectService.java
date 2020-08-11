@@ -204,10 +204,10 @@ public class TelegramConnectService implements CommandLineRunner {
     public void handleIrcMessage(IrcMessageEvent event) {
         long chatId = Long.valueOf(event.getParameter());
         log.debug("IRC event: {}", chatId);
-        String fromIrc = String.format("%s@%s %s", event.getSender(), event.getChannel(), event.getMessage());
-        SendMessage message = new SendMessage() // Create a SendMessage object with mandatory fields
-                .setChatId(chatId)
-                .setText(fromIrc);
+        String fromIrc = String.format("%s: %s", event.getSender(), event.getMessage());
+      SendMessage message = new SendMessage() // Create a SendMessage object with mandatory fields
+        .setChatId(chatId)
+        .setText(fromIrc);
         try {
             telegramBot.sendMessage(message);
         } catch (TelegramApiException e) {
